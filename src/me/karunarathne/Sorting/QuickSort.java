@@ -11,7 +11,10 @@ public class QuickSort {
     }
 
     private static void sort (Comparable [] a, int lo, int hi) {
-        
+        if (hi <= lo) return ;
+        int j = partition (a, lo, hi) ;
+        sort (a, lo, j-1) ;
+        sort (a, j+1, hi) ;
     }
 
     private static boolean isLess (Comparable v,  Comparable w) {
