@@ -1,0 +1,192 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <time.h>
+
+/**
+ * Determine if the given file is a directory.
+ * Return 1 if the given file is a directory, 0 otherwise.
+ */
+int is_directory(char *file)
+{
+    struct stat file_stat;
+
+    // Get the file status
+    stat(file, &file_stat);
+
+    // Return 1 if the file is a directory, 0 otherwise
+    return S_ISDIR(file_stat.st_mode);
+}
+
+/**
+ * Get the name of the file from the given path.
+ * Return the name of the file.
+ */
+char *get_file_name(char *path)
+{
+    char *p = path + strlen(path);
+
+    // Move the pointer to the last character of the path
+    while (*p != '/' && p != path)
+    {
+        p--;
+    }
+
+    // If the pointer is at the beginning of the path, it means the path does not contain any slashes
+    if (p == path)
+    {
+        // Return the path
+        return path;
+    }
+    else
+    {
+        // Return the name of the file
+        return p + 1;
+    }
+}
+
+/**
+ * Get the creation date of the given file.
+ * Return the creation date of the given file.
+ */
+char *get_file_creation_date(char *file)
+{
+    struct stat file_stat;
+    struct tm *creation_time;
+    char *date = malloc(100);
+
+    // Get the file status
+    stat(file, &file_stat);
+
+    // Get the creation time of the file
+    creation_time = localtime(&file_stat.st_ctime);
+
+    // Format the date
+    strftime(date, 100, "%d-%m-%Y", creation_time);
+
+    // Return the creation date of the file
+    return date;
+}
+
+/**
+ * Ask the user if the given file is to be kept or deleted.
+ * Return 1 if the given file is to be kept, 0 otherwise.
+ */
+int ask_user(char *file)
+{
+    char answer;
+
+    // Ask the user if the given file is to be kept or deleted
+    printf("Keep file %s? (y/n): ", file);
+    scanf("%c", &answer);
+
+    // Consume the newline character
+    getchar();
+
+    // Return 1 if the user wants to keep the file, 0 otherwise
+    return answer == 'y';
+}
+
+
+/**
+ * The main function, expects a directory name as argument.
+ * Find all files with the same name in the given directory and its sub directories.
+ * Show their name, which folder they are in and what day they were created.
+ * For each duplicate file, ask user if each one of the files is to be kept or deleted.
+ * Based on user input, perform the appropriate action.
+ */
+int main(int argc, char *argv[])
+{
+    char *dir;
+
+    // Check if the user has entered the correct number of arguments
+    if (argc != 2)
+    {
+        printf("Usage: %s <directory> <filename>\n", argv[0]);
+        exit(1);
+    }
+
+    // Get the directory name from the arguments
+    dir = argv[1];
+
+    // Find and print all files with the same name in the given directory and its sub directories
+    find_duplicate_files(dir);
+
+    return 0;
+}
+
+/**
+ * Find all files with the same name in the given directory and its sub directories.
+ * Show their name, which folder they are in and what day they were created.
+ */
+void find_duplicate_files(char *dir)
+{
+    DIR *dirp;
+    struct dirent *dp;
+    char *file, *file_name, *file_creation_date;
+    int keep_file;
+
+    // Open the given directory
+    dirp = opendir(dir);
+
+    // Check if the directory was opened successfully
+    if (dirp == NULL)
+    {
+        printf("Error: Cannot open directory %s\n", dir);
+        return;
+    }
+
+    // Read the directory entries
+    while ((dp = readdir(dirp)) != NULL)
+    {
+        // Check if the directory entry is a file or a directory
+        if (dp->d_type == DT_REG)
+        {
+            // Get the name of the file
+            file_name = get_file_name(dp->d_name);
+
+            // Get the creation date of the file
+            file_creation_date = get_file_creation_date(dp->d_name);
+
+            // Print the file name, the directory name and the creation date
+            printf("File: %s\nDirectory: %s\nCreation date: %s\n", file_name, dir, file_creation_date);
+
+            // Ask the user if the file is to be kept or deleted
+            keep_file = ask_user(dp->d_name);
+
+            // If the user wants to keep the file, move it to the current directory
+            if (keep_file)
+            {
+                // Get the path of the file
+                file = malloc(strlen(dir) + strlen(dp->d_name) + 2);
+                sprintf(file, "%s/%s", dir, dp->d_name);
+
+                // Move the file to the current directory
+                rename(file, dp->d_name);
+            }
+            else
+            {
+                // Delete the file
+                remove(dp->d_name);
+            }
+        }
+        else if (dp->d_type == DT_DIR)
+        {
+            // Check if the directory entry is not a special directory entry
+            if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
+            {
+                // Get the path of the directory
+                file = malloc(strlen(dir) + strlen(dp->d_name) + 2);
+                sprintf(file, "%s/%s", dir, dp->d_name);
+
+                // Find all files with the same name in the given directory and its sub directories
+                find_duplicate_files(file);
+            }
+        }
+    }
+
+    // Close the directory
+    closedir(dirp);
+}
