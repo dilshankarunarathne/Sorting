@@ -1,0 +1,131 @@
+uname
+Displays Linux system information
+
+uname -r
+Displays kernel release information
+
+uptime
+Displays how long the system has been running including load average
+
+hostname
+Shows the system hostname
+
+hostname -i
+Displays the IP address of the system
+
+last reboot
+Shows system reboot history
+
+date
+Displays current system date and time
+
+timedatectl
+Query and change the System clock
+
+cal
+Displays the current calendar month and day
+
+w
+Displays currently logged in users in the system
+
+whoami
+Displays who you are logged in as
+
+finger username
+Displays information about the user
+
+cat /proc/cpuinfo
+Displays more information about CPU e.g model, model name, cores, vendor id
+
+cat /proc/meminfo
+Displays more information about hardware memory e.g. Total and Free memory
+
+lshw
+Displays information about system's hardware configuration
+
+free -m
+Displays free and used memory in the system (-m flag indicates memory in MB)
+
+dmidecode
+Displays hardware information from the BIOS
+
+hdparm -i /dev/xda
+Displays information about disk data
+
+badblocks -s /dev/xda
+Tests for unreadable blocks on disk
+
+id
+Displays the details of the active user e.g. uid, gid, and groups
+
+last
+Shows the last logins in the system
+
+who
+Shows who is logged in to the system
+
+groupadd "admin"
+Adds the group 'admin'
+
+adduser "Sam"
+Adds user Sam
+
+su Sam
+log in as user Sam
+
+userdel "Sam"
+Deletes user Sam
+
+usermod
+Used for changing / modifying user information
+
+cal
+calender 
+
+ncal
+calender with date highlighted
+
+date '+Date: %D %nTime: %T'
+prints Date: 03/24/23 Time 15:00:35
+
+date '+24 Hour: %T %n12 Hour: %X'
+prints 24 / 12 hour format time
+
+ls –l test
+Find the permissions of file test
+
+chown user1 /home/user1/test
+Change the ownership of the file to user1
+
+umask
+Find the current umask setting
+
+chgrp <newgroup> /home/user1/test
+Change group of file test
+
+chown <new user>: <new group> file name
+Change ownership and group of file test1 with a single command
+
+chown –R <new user> directory name
+Change the ownership of all the files in user1’s home directory with a single command
+
+chmod 777 /abc
+Set full/(setuid) permission on the file abc
+
+zip <output file .zip> <folder to zip>
+compresses a folder into a zip file
+
+nano 
+opens up nano text editor
+
+gcc hello.c -o hello.o
+compiles hello.c c program into hello.o executable
+
+./hello.o
+runs hello.o compiled program
+
+ls *.txt
+will list all files in the current directory that end with the ".txt" file extension.
+
+
+
