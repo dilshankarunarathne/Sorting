@@ -127,5 +127,24 @@ runs hello.o compiled program
 ls *.txt
 will list all files in the current directory that end with the ".txt" file extension.
 
+command &
+runs command in background
 
+bg
+background the suspended job
+
+jobs
+list current jobs
+
+fg %1
+foreground job 1
+
+kill %1
+kill job 1
+
+ps
+list current processes 
+
+kill 235
+kill process with id 235
 
