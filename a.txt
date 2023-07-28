@@ -1,866 +1,989 @@
-<example> = <karana wade>
+//playfair
+import java.util.Scanner;
+public class play
+{
+     public static void main(String []args)
+	 {
+		char []alpha={'A','B','C','D','E','F','G','H','I','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+		Scanner scan=new Scanner(System.in);
+		System.out.println("Enter message: ");
+		String text=scan.next();
+		String text1=text.toUpperCase();
+		System.out.println("Enter key: ");
+		String key=scan.next();
+		
+		String keys=key.toUpperCase();
+		String key1=removeDuplicateElements(keys);
+		String key2=createKeyArray(key1,alpha);
+		char array[][]=createKeyMatrix(key2);
+		printKeyMatrix(array);
+		
+		String prepareText=preparePlaintext(text1);
+		String cipherText=encryption(prepareText,array);
+		System.out.println("Enter message: "+prepareText);
+		System.out.println("Encrypt message: "+cipherText);
+		String plainText=decryption(cipherText,array);
+		System.out.println("Decrypt message: "+plainText);
+        String plainTextNew=removeFiilerElemets(plainText);
+		System.out.println("Decrypt message: "+plainTextNew);
+		
+	 }
+	 //**********************************************
+	 
+	 static String removeDuplicateElements(String key)
+	 {
+		 if(key!="" && key!=null)
+		 {
+			 char array[]=new char[key.length()];
+			 for(int i=0;i<array.length;i++)
+			 {
+				 if(isNotContains(array,key.charAt(i)))
+					 array[i]=key.charAt(i);
+			 }
+			 return removeEmptyElements(array);
+		 }
+		 return "";
+	 }
+	 
+	 //*********************************************
+	 static boolean isNotContains(char []array,char c)
+	 {
+		for(int i=0;i<array.length;i++)
+		{
+				 if(array[i]==c)
+					return false; 
+		}
+		return true;
+	 }
+	 
+	 //**********************************************
+	 static String removeEmptyElements(char []array)
+	 {
+		 String text="";
+		 for(int i=0;i<array.length;i++)
+		 {
+			 if(array[i]!='\u0000')
+				 text+=array[i];
+		 }
+		 return text;
+	 }
+	 //**************************************************
+	 static String createKeyArray(String key,char []alpha)
+	 {
+		 char array[]=new char[25];
+		 for(int i=0;i<key.length();i++)
+		 {
+			 array[i]=key.charAt(i);
+		 }
+		 int count=key.length();
+		 
+		 for(int j=0;j<array.length;j++)
+		 {
+			if(isNotContains(array,alpha[j]))
+			{
+			    array[count++]=alpha[j];
+			}
+		 }
+		return removeEmptyElements(array);
+	 }
+    //*********************************************
+	static char[][] createKeyMatrix(String key)
+	{
+		int k=0;
+		char [][]array=new char[5][5];
+		for(int i=0;i<5;i++)
+		{
+			for(int j=0;j<5;j++)
+			{
+				array[i][j]=key.charAt(k++);
+			}
+		}
+		return array;
+	}
+	//*********************************************
+	static void printKeyMatrix(char [][]array)
+	{
+		for(int i=0;i<5;i++)
+		{
+			for(int j=0;j<5;j++)
+			{
+				System.out.print(array[i][j]+" ");
+			}
+			System.out.println();
+		}
+	}
+	static int[] findpositions(char c,char [][]matrix)
+	{
+		int []postion=new int[2];
+		for(int i=0;i<5;i++)
+		{
+			for(int j=0;j<5;j++)
+			{
+				if(matrix[i][j]==c)
+				{
+					postion[0]=i;
+					postion[1]=j;
+					break;
+				}
+			}		
+		}
+		return postion;
+	}
+	//********************************************
+	static String preparePlaintext(String plaintext)
+	{
+		String newPlain="";
+		for(int i=0;i<plaintext.length();i++)
+		{
+			char currentChar=plaintext.charAt(i);
+			if(currentChar=='J')
+			{
+				currentChar='I';
+			}
+			
+			if(i<plaintext.length()-1)
+			{
+				char newChar=plaintext.charAt(i+1);
+				if(currentChar==newChar)
+				{
+					newPlain+=currentChar+"X";
+				}
+				else
+				{
+					newPlain+=currentChar;
+				}
+			}
+			else
+			{
+				newPlain+=currentChar;
+			}
+		}
+		if(newPlain.length()%2!=0)
+		{
+			newPlain+="X";
+		}
+		return newPlain;
+	}
+	//********************************************************
+	static String encryption(String plaintext,char [][]matrix)
+	{
+		String cipherMsg="";
+		for(int i=0;i<plaintext.length();i+=2)
+		{
+			char char1=plaintext.charAt(i);
+			char char2=plaintext.charAt(i+1);
+			
+			int postion1[]=findpositions(char1,matrix);
+			int postion2[]=findpositions(char2,matrix);
+			
+			if(postion1[0]==postion2[0])
+			{
+				cipherMsg+=matrix[postion1[0]][(postion1[1]+1)%5];
+				cipherMsg+=matrix[postion2[0]][(postion2[1]+1)%5];
+			}
+			else if(postion1[1]==postion2[1])
+			{
+				cipherMsg+=matrix[(postion1[0]+1)%5][postion1[1]];
+				cipherMsg+=matrix[(postion2[0]+1)%5][postion2[1]];
+			}
+			else
+			{
+				cipherMsg+=matrix[postion1[0]][postion2[1]];
+				cipherMsg+=matrix[postion2[0]][postion1[1]];
+			}
+		}
+		return cipherMsg;
+	}
+	//**************************************************
+	static String decryption(String ciphertext,char [][]matrix)
+	{
+		String plainMsg="";
+		for(int i=0;i<ciphertext.length();i+=2)
+		{
+			char char1=ciphertext.charAt(i);
+			char char2=ciphertext.charAt(i+1);
+			
+			int postion1[]=findpositions(char1,matrix);
+			int postion2[]=findpositions(char2,matrix);
+			
+			if(postion1[0]==postion2[0])
+			{
+				plainMsg+=matrix[postion1[0]][(postion1[1]-1+5)%5];
+				plainMsg+=matrix[postion2[0]][(postion2[1]-1+5)%5];
+			}
+			else if(postion1[1]==postion2[1])
+			{
+				plainMsg+=matrix[(postion1[0]-1+5)%5][postion1[1]];
+				plainMsg+=matrix[(postion2[0]-1+5)%5][postion2[1]];
+			}
+			else
+			{
+				plainMsg+=matrix[postion1[0]][postion2[1]];
+				plainMsg+=matrix[postion2[0]][postion1[1]];
+			}
+		}
+		return plainMsg;
+	}
+	//***************************************************
+	static String removeFiilerElemets(String text)
+	 {
+		 String newText="";
+		 for(int i=0;i<text.length();i++)
+		 {
+			 if(text.charAt(i)!='X')
+				 newText+=text.charAt(i);
+		 }
+		 return newText;
+	 }
+}
+==============================================================================================================================================
+//Ceaser Cipher
+import java.util.*;
 
-cd = inna folder 1 wenas karanawa
-
-cd .. = inna folder 1ta kalin folder 1ta yanawa
-
-pwd = inna folder 1k address 1 pennanawa
-
-ls = folder 1k thiyena folder,file pennanawa
-
-ls /<foldername> = folder 1k content pennanawa
-
-ls -al = folder 1k thiyena folder,file,hidden ewa pennanawa
-
-mkdir <folder name> = aluth folder 1k hadanawa
-
-rmdir <folder name> = folder 1k delete karanawa
-
-mkdir -p <folder1>/<folder2>/<folder3> = folders create wenawa parent folder widiyata
-
-man mkdir = mkdir manual
-
-rm <file name> = file 1k delete karanawa
-
-cp <file name> <file name/directory address> = file folder copy karanawa
-
-mv <file/folder> <file/folder> = file folder rename,move karanawa
-
-touch <filename> = file create karanda puluwan
-
-cat >> text.txt = file 1k athule thiyena ewa read karanawa
-
-vim <filename>  = file 1k create karala edit karanna puluwan
-
-whoami = user ge nama ganda
-
-su <username> = userwa change karanda
-
-sudo su = root access denawa
-
-sudo adduser <username> = new user kenek hadanawa
-
-sudo passwd <username> = password 1 wenas karanda
-
-clear = terminal 1 clear karanawa
-
-lsb_release -a = version 1 balanda
-
-zip -r <name of zip> <contains> = zip file 1k hadanda
-
-cal = current month calender with highlight today
-
-cal 09 2021 = current for specific month of year
-
-cal -y = current for whole year calender with highlight today
-
-cal 2011 = whole calender for specific year
-
-cal -3 = show calender for previous, current and next
-
-echo "My dog step on a bee." = print message
-
-chmod +r firstfile.txt  = give readonly permission to firstfile.txt 
-
-chmod -w secondfile.txt = remove the write permission from secondfile.txt 
- 
-chmod o+w thirdfile.txt , $chmod g+w thirdfile.txt = add writeonly permission for owner and group
+public class CeaserCipher{
 	
-chmod ugo-rwx ~/examuser/doc_folder = restrict all permission for any user in doc_folder
-
-chmod ugo-rwx ~/exam_doc = do not give permission for any user to read or execute exam_doc
-
-cat secondfile.txt >> ~/exam_doc/exam3/thirdfile.txt = Append content from secondfile.txt to thirdfile.txt
-
-xwininfo
-import -window <window id> <snapshot file name> = use xwininfo to find window id .then use it save the window as png	
-
-compgen -c = okkama command thiyenawa
-
-compgen -c | grep <command 1k kallak> = command hoyaganda puluwan
-
-man <command>= command wala manual 1 ganda puluwan
-
-cat secondfile.txt >> ~/exam_doc/exam3/thirdfile.txt = Append content from secondfile.txt to thirdfile.txt
-
-sudo apt-get install tree = show folder hierarchy of home in tree structure
-
-___________________________________________________________________________________________________________
-
-*Changing the Screen Size*
-Open /etc/default/grub file.
-Type the below commands
-	GRUB_GFXMODE=1280x1024 #width x height required
-	GRUB_CMDLINE_LINUX_DEFAULT="nomodeset"
-	GRUB_GFXPAYLOAD_LINUX=keep
-Save the file. Then issue the following commands
-sudo update-grub
-sudo reboot
-
-
-*Changing the Terminal Fontsize*
-Open /etc/default/console-setup file.
-Change the values for font type and font size to
-	FONTFACE="TER"
-	FONTSIZE="16x32"
-Save the file. Then issue the following command
-sudo update-initramfs -u
-______________________________________________________________________________________________
-File Handling Commands
-
-1. The cat Command:
-Usage: This command is used to,
-i. Creating a File
-ii. Displaying the File Contents
-iii. Combining text files contents
-Syntax:
-	 cat > [file name]
-	 cat [options] [file name]
-	 cat [file 1] > [file 2]
-	cat [file 1] [file 2] > [file3]
-	cat [file 1] >> [file 2]
-Options:
-i. -b - print line numbers with content (exclude blank line)
-ii. -n - print line numbers with content (include blank line)
-iii. -s - display the file content
-Example: $cat sample1.txt
-Output: To display the content of sample1 text file.
-
-2. The cp Command:
-Usage: This command is used to create duplicate copies of ordinary files.
-	Syntax: cp [source file] [destination file]
-Example: $cp sample1.txt sample.txt
-Output: creates the copy of sample1.txt
- Note: Copy file to directory (with / without overwriting)
-
-3. The mv Command:
-Usage: This command is used to move or rename ordinary files and directories.
-	Syntax: mv [source file] [destination file]
-	Example: $mv sample.txt sampling.txt
-	Output: renames the file sample.txt to sampling.txt
- Note: Copy file to directory (with / without overwriting)
-
-4. The wc Command:
-Usage: This command is used to count lines, words and characters, depending on the option
-used.
-	Syntax: wc [options] [file name]
-Options:
-i. -l: Number of lines
-ii. -w: Number of words
-iii. -c: Number of characters
-	Example: $ wc sample1.txt
-	Output: 65 2776 17333 sample1.txt
- Which means sample1.txt file has 65 lines, 2776 words, and 17333 Characters.
-
-5. The od Command:
-Usage: This command is used to display the actual file content on octal value format.
-	Syntax: od [option] filename
-	Example: od -c file1.txt
-
-6. The ln Command:
-Usage: The ln command is used to create link to a file (or) directory. It helps to provide
-soft link for desired files.
-	Syntax: ln [options] existing file (or directory) name new file (or directory) name
-Options:
-i. -n - Does not overwrite existing files.
-ii. -s - Used to create soft links
-	Example: ln -s file1.txt file2.txt
-	Output: Creates a symbolic link to 'file1.txt' with the name of 'file2.txt'.
-
-7. The more Command:
-Usage: This command is used to display the output of a command on the screen page by
-Page.
-	Syntax: more [options] filename
-Options:
-i. -n - skip n lines and display another screen [ n as an integer]
-ii. -h - displays all the options in more
-Example: $more sampling.txt
-Output: To display the output of sampling.txt in page by page.
-
-8. The diff Command:
-Usage: This command is used to find difference between two files.
-	Syntax: diff [options...] from-file to-file
-Options:
-i. -w Ignore white space when comparing lines.
-ii. -a Treat all files as text and compare them line-by-line.
-iii. -b Ignore changes in amount of white space.
-	Example: $ diff -w file1.txt file2.txt
-
-9. The cmp Command:
-Usage: This command is used to compare two files whether they are identical or not.
- The two files are compared byte by byte and the location of the first mismatch is
-printed on the screen.
- If two files are identical, then it does not print anything on the screen
-	Syntax: cmp <file1> <file2>
-	Example: $ cmp sample1.txt sample2.txt
-
-10. The touch Command:
-Usage: This command is used to empty files / used to change the time stamp of existing
-files.
-	Syntax: touch [file name]
-	Example: $touch sample1.txt
-	Output: creates the empty file with name sample1.txt
-
-11. The nano Command:
-Usage: This is a small and user-friendly editor used to create files.
-	Syntax: nano [file name]
-	Example: $nano sample1.txt
-	Output: Opens the editor to create the file with name sample1.txt
-
-12. The rm Command:
-Usage: It is used to remove the specified file in directory.
-	Syntax: rm [source file]
-	Example: rm dir/file1
-	Output: To delete the text file name file1.
- Removing folders with files
-________________________________________________________________________________________________________________
-VIM Editor Commands
-
-From command mode to insert mode type a/A/i/I/o/O ( see details below)
-From insert mode to command mode type Esc (escape key)
-Some useful commands for VIM
-Text Entry Commands (Used to start text entry)
-
-a Append text following current cursor position
-A Append text to the end of current line
-i Insert text before the current cursor position
-I Insert text at the beginning of the cursor line
-o Open up a new line following the current line and add text there
-O Open up a new line in front of the current line and add text there
-The following commands are used only in the commands mode.
-Cursor Movement Commands
-h Moves the cursor one character to the left
-l Moves the cursor one character to the right
-k Moves the cursor up one line
-j Moves the cursor down one line
-nG or :n Cursor goes to the specified (n) line
-(ex. 10G goes to line 10)
-^F (CTRl F) Forward screenful
-^B Backward screenful
-^f One page forward
-^b One page backward
-^U Up half screenful
-^D Down half screenful
-$ Move cursor to the end of current line
-0 (zero) Move cursor to the beginning of current line
-w Forward one word
-b Backward one word
-
-Exit Commands
-:wq Write file to disk and quit the editor
-:q! Quit (no warning)
-:q Quit (a warning is printed if a modified file has not been saved)
-ZZ Save workspace and quit the editor (same as :wq)
-: 10,25 w temp
-
-write lines 10 through 25 into file named temp. Of course, other line
-numbers can be used. (Use :f to find out the line numbers you want.
-Text Deletion Commands
-x Delete character
-dw Delete word from cursor on
-db Delete word backward
-dd Delete line
-d$ Delete to end of line
-d^ (d caret, not CTRL d) Delete to beginning of line
-Yank (has most of the options of delete)-- VI's copy commmand
-yy yank current line
-y$ yank to end of current line from cursor
-yw yank from cursor to end of current word
-5yy yank, for example, 5 lines
-Paste (used after delete or yank to recover lines.)
-p paste below cursor
-P paste above cursor
-"2p paste from buffer 2 (there are 9)
-u Undo last change
-U Restore line
-J Join next line down to the end of the current line
-
-File Manipulation Commands
-:w Write workspace to original file
-:w file Write workspace to named file
-:e file Start editing a new file
-:r file Read contents of a file to the workspace
-To create a page break, while in the insert mode, press the CTRL key
-And l. ^L will appear in your text and will cause the printer to start
-A new page.
-
-Other Useful Commands
-Most commands can be repeated n times by typing a number, n, before
-the command. For example 10dd means delete 10 lines.
-	. Repeat last command
-	cw Change current word to a new word
-	r Replace one character at the cursor position
-	R Begin overstrike or replace mode � use ESC key to exit
-	:/ pattern Search forward for the pattern
-	:? pattern Search backward for the pattern
-	n (used after either of the 2 search commands above to
-	continue to find next occurrence of the pattern.
-	:g/pat1/s//pat2/g replace every occurrence of pattern1 (pat1) with
-	pat2
-	Example :g/tIO/s//Ada.Text_IO/g
-	This will find and replace tIO by Ada.text_IO everywhere in the file.
-	:g/a/s// /g replace the letter a, by blank
-	:g/a/s///g replace a by nothing
-	note: Even this command be undone by u
-Examples
-
-Opening a New File
-	Step 1 type vim filename (create a file named filename)
-	Step 2 type i ( switch to insert mode)
-	Step 3 enter text (enter your Ada program)
-	Step 4 hit Esc key (switch back to command mode)
-	Step 5 type :wq (write file and exit vim)
-
-Editing the Existing File
-	Step 1 type vim filename (edit the existing file named filename)
-	Step 2 move around the file using h/j/k/l key or any appropriate command
-		h Moves the cursor one character to the left
-		l Moves the cursor one character to the right
-		k Moves the cursor up one line
-		j Moves the cursor down one line
-	nG or :n Cursor goes to the specified (n) line
-	(ex. 10G goes to line 10)
-	Step 3 edit required text (replace or delete or insert)
-	Step 4 hit Esc key (exit from insert mode if you insert or replace text)
-	Step 5 type :wq
-_____________________________________________________________________________________________________
-File & Folder Permissions
-
-	user   group   others
-chmod [0 - 7] [0 - 7] [0 - 7] [file/folder name]
-chmod ugo+rwx [file/folder name]
-
-ls -l [dir] :- folder file permissions in the directory
-ls -ld [dir] :- folder permissions in the directory
-
-	4	2	1
-0	-	-	-	no permissions
-1	-	-	x	only execute
-2	-	w	-	only write
-3	-	w	x	write and execute
-4	r	-	-	only read
-5	r	-	x	read and execute
-6	r	w	-	read and write
-7	r	w	x	read,write and execute
-
-**use sudo [command] if does not work
-__________________________________________________________________________________________
-Processes Handling in Ubuntu Server
-
-1. List all process in current shell.
-	• $ ps
-Output:
-PID - Processes ID
-TTY- Computer Terminal that executed particular command.
-Time - The time take by the CPU
-CMD - The name of the command that launched the process.
-
-2. Display every active processes
-	• $ ps -A
-	• $ ps -e
-
-3. Display all process and process not associated with terminal
-	• $ ps -au or
-	• $ ps -aux
-a - list the processes of all the users
-u - to provide detailed information about each process
-x - add to the list process that have no controlling terminal, such as daemon, which are
-programs, that are launched during booting and run in the background until they are
-activated by the particular event.
-Output:
-PID - Process ID
-%CPU - Percentage of CPU
-%MEM - Percentage of Memory used by the Process
-VSZ - Virtualization size in kilobytes.
-RSS - Real memory size or Resident Set Size in 1024 bytes unit
-STAT - The Process State Code
-
-4. To perform full-format listing.
-	• $ ps -ef OR $ ps -eF
-Output Header:
-UID - Username of the process’s owner
-PID - Process ID number
-PPID - Parent Process ID number
-C - CPU usage and scheduling information
-STIME - Time when the process started.
-TTY - Terminal associated with the process.
-Time - Total CPU usage
-CMD – Name of the process.
-
-5. To select all the process owned by the user.
-	• $ ps -x
-6. To display users, process by real user id or name.
-	• $ ps -fu guesttc (your username)
-OR
-	• $ ps -fu 1002 (to see the user id: id -u username)
-
-7. To Display root process
-	• $ ps -fu root
-OR
-	• $ ps -fu 0
-
-8. Display Group process
-	• $ ps -fg guesttc
-OR
-	• $ ps -fg 1008
-to find the group id getent group | grep mygroup) or (cat /etc/group | grep mygroup)
-
-9. Display process by PID and PPID
-	• $ ps -fp 1588 - Select process by ppid
-	• $ ps -f --ppid 1587 - Make Selection Using PID List
-	• $ ps -fp 1394,1587
-
-10. Print process tree
-	• $ ps -e --forest
-From this tree we can identify which is the parent process and the child process it forked
-in a recursive manner.
-To print the process tree for a given process.
-	• $ ps -f --forest -C sshd ( -C for command )
-OR
-	• $ ps -ef --forest | grep sshd
-11. Print Process Threads
-	• $ ps -fL -C sshd
-Output:
-LWP: Light Weight Process
-NLWP: Number of Light Weight Process
-
-12. Troubleshoot Linux System Performance.
-To find top running process
-	• $ ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head
-The head piping will display for first 10 line of the record, if you want to view more or less
-pass the line number as -n parameter.
-	• $ ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head -n 15
-If you want to sort by cpu value
-	• $ ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%cpu | head
-If you want to stop any process that is consuming high cpu time
-	• $ kill -o pid
-
-13. To see Real-time Process Monitoring.
-	• watch -n 1 'ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head'
--n : interval in seconds.
-To exit: Ctl + z
-_________________________________________________________________________________________________________________________
-Configuring Static, Dynamic IP Address on Ubuntu Server
-
-1. Check/Display all available network interface
-	• $ip link show
-
-2. Identifying Ethernet Interfaces
-	• $sudo ip a OR $ip a
-[Loopback address is a software address (127.0.0.1)]
-	• $sudo ip addr OR $ip addr
-	• $sudo lshw –class network
-[Detailed hardware information about network cards on Linux]
-
-3. Check the current IP of the server
-	• $ifconfig
-
-4. Temporary IP address assignment
-	1) Temporary IP address assigning (This will work on real environment & it is not
-	physically connected to the network)
-	$sudo ip addr add 10.0.2.20/24 dev enp0s3
-	$sudo ip link set dev enp0s3 down
-	$sudo ip link set dev enp0s3 up
-	$ip address show dev enp0s3
+	char alp[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 	
-	2) Configure Default gateway
-	$sudo ip route add default via 10.0.2.1
-	$sudo ip route show (to see the default gateway)
-
-	3) Add temporary DNS Client address
-	✓ Edit /etc/resolv.conf
-	$sudo vi /etc/resolv.conf
-	Add nameserver 8.8.8.8
-
-	4) To delete all IP configuration
-	$sudo ip addr flush enp0s3
-
-5. Static IP Address assignment.
-	• Go to netplan directory
-		$cd /etc/netplan
-	• List out the contents in the netplan
-		$ll
-	• Open the .yaml file
-		$sudo vi 00-installer-config.yaml
-	• Change the file with the below values
-	• Then apply the changers
-		$sudo netplan apply
-	• See the IP address by giving the command “ifconfig”
-		$ifconfig
-
-6. Dynamic IP Address Assignment (DHCP)
-	To configure your server to use DHCP dynamic address assignment
-	• open the file “/etc/netplan/50-cloud-init.yaml”
-		$sudo vi /etc/netplan/00-installer-config.yaml
-		Keep the dhcp4 = true
-		Save the file and exit
-	• Apply the changes on configuration by giving the command “netplan apply”
-		$sudo netplan apply
-
-_______________________________________________________________________________________________________________________________________________________________________________________
-
- USER, GROUP MANAGEMENT
-    1
-Linux Users
-•   In Linux there are three types of users
-     1. Super / Root user - Powerful user, Administrator User
-     2. System user - users created by the Software / Applications
-     3. Normal user – the users created by root user (normal users)
-
-
-            Type                        Example                       Home Directory                     shell
-    Super user           root                                       /root                        /bin/bash
-    System user          ftp, ssh, apache                           /var/ftp, /etc               /sbin/nologin
-    Normal user          visitor, ec2-user, student                 /home/{user-name}            /bin/bash
-
-
-
-
-       2
-Understanding passwd, shadow files
-•   /etc/passwd – Keeps the user account name, acc group, acc description and
-    password information.
-
-•   /etc/shadow – Holds the encrypted password of the corresponding account.
-
-•   /etc/group – This files contains the group information for each account.
-
-•   /etc/gshadow – Holds the encrypted password of the corresponding group.
-
-
-
-
-   3
-        $cat /etc/passwd
-                     acc name : x : 1000 : 1000 : aaa : /home/user or acc name : /bin/bash
-
-•   x - indicates encrypted password is set (If that password is not set, it will be denoted as [!] mark)
-•   1000 – user id
-    ✓ 0 – root id
-    ✓ 1 – 999 – system id
-    ✓ 1000, 1001, 1002, …. , n – normal user id
-
-•   1000 – group id (primary group id) – by default group name is same as user acc name
-•   aaa – Description / Comment about the acc (this is optional we can leave it as empty)
-•   /home/user or acc name – home directory of the user
-•   /bin/bash – shell for the particular user
-
-
-   4
-       $cat /etc/shadow
-•   Only contains the encrypted passwords for the users account (not for the system accounts)
-•   Why /etc/shadow file introduced ?
-                                acc name : x : y : 0 : 9999 : 7 : a : b :
-•   x - encrypted password [xysed45269.vevhefiv786764FHFievJJHGTT]
-•   y - When the password finally set
-•   0 - Show possibility of changing the initial / already set password (0 – means you can change
-    the password multiple times in a day)
-•   9999 - Show the password expires period (9999 – never expires)
-•   7 - Remainder days
-•   a - Maximum grace period - By default it will be empty (means never)
-•   b - Account disable period - By default it will be empty (means never)
-
-   5
-       $cat /etc/group
-•   It will show users groups and system groups
-                                                group name : x : a
-•   x - encrypted password
-•   a - group id
-
-
-       $cat /etc/gshadow
-                                                group name : x : :
-•   x - encrypted password [xysed45269.vevhefiv786764FHFievJJHGTT]
-•   a - group id
-
-   6
-useradd command:
-•   It edits /etc/passwd, /etc/shadow, /etc/group and /etc/gshadow files for the newly
-    created user accounts.
-•   Creates and populates a home directory for the new user.
-•   Sets permissions and ownerships to the home directory.
-•   Syntax:
-    ✓ useradd [options] <username>
-
-
-
-
-   7
-     Adding user with different options:
-✓ Ex:
- ➢    useradd -d homedir -g groupname -m -s shellname -u userid <accname>
- •   -d     - Define custom home directory (Default /home/<username>)
- •   -g     - Assign a group to this user (By default primary will be created same as username)
- •   -m     - Create home directory if doesn’t exist
- •   -s     - Specify the custom shell (Default shell is /bin/sh)
- •   -u     - Assign unique identification number if needed
-
-✓ Ex:
- •   useradd -d /home/gem -g developers -c “Gem The Coder” -s /bin/ksh gem-dev
-
-
-
-
-   8
-usermod Command
-•   The usermod command enables you to make changes to an existing account from the
-    command line.
-•   It uses the same arguments as the useradd command.
-
-
-Example :
-             usermod –d /home/gem-new-m-l gem-dev gem-developer
-    ▪   -d - Changing home directory to/home/gem-new
-    ▪   -m - Create /home/gem-new directory is not available
-    ▪   -l   - Change Login name to gem-developer
-
-
-   9
-         usermod Command Option:
-•   -c       = We can add comment field for the user account.
-•   -d       = To modify the directory for any existing user account.
-•   -e       = Using this option we can make the account expiry in specific period.
-•   -g       = Change the primary group for a user
-•   -G       = To add a supplementary groups.
-•   -a       = To add anyone of the group to a secondary group.
-•   -l       = To change the login name
-•   -L       = To lock the user account. This will lock the password so we can’t use the account.
-•   -m       = moving the contents of the home directory from existing home dir to new dir.
-•   -p       = To use un-encrypted password for the new password (NOT Secured).
-•   -s       = create a specified shell for new accounts.
-•   -u       = used to assigned UID for the user account between 0 to 999
-•   -U       = To unlock the user accounts. This will remove the password lock and allow us to see the user account.
-
-   10
-userdel Command:
-•   The userdel command can be used to delete an existing user. This is a very dangerous
-    command if not used with caution.
-•   Syntax:
-    ✓ userdel [option] username
-
-•   Ex:
-    ✓ userdel -r gem-developer
-
-•   There is only one argument or option available for the command –r, for removing the
-    account’s home directory.
-
-
-
-
-   11
-groupadd Command:
-•   groupadd command creates a new group account using the values specified on the
-    command line and the default values from the system.
-•   The new group will be entered into the system files as needed.
-•   Syntax:
-    ✓ groupadd [options] <groupname>
-
-•   Ex:
-    ✓ groupadd -g 7500 developers
-       ▪    Creates group developers with group id 7500
-
-
-
-
-   12
-groupmod Command:
-•   We can modify already existing groups using “groupmod” command with required
-    options.
-•   Ex:
-    ✓ groupmod -n <new_group_name> <old_group_name>
-
-•   To change the developers group name to developers-new
-    ✓ $ groupmod –n developers-new developers
-
-•   Here is how you will change the GID to 5700
-    ✓ $ groupmod -g 5700 developers-new
-
-
-
-
-   13
-Deleting the group:
-•   We can delete an existing group using “groupdel” command.
-•   Syntax:
-    ✓ groupdel groupname
-
-•   Ex:
-    ✓ groupdel developers
-
-
-
-
-   14
-Activities
-1.     List users
-2.     List groups
-3.     Create a new user
-4.     Change user password of set password for the new user
-5.     Add new group
-6.     Add existing user to group
-7.     Removing user from group
-8.     Change user primary group
-9.     Delete groups
-10.    Delete users
-
-   15
-•   List users
-    ✓ Show current user - $ users
-    ✓ List all users - $ cat /etc/passwd OR $ getent passwd
-
-
-
-•   List groups
-    ✓ Show groups for the current user    - $ groups
-    ✓ Show groups for a user - $ groups <username>
-    ✓ List all groups - $ cat /etc/group OR $ getent group
-
-
-
-
-   16
-
-
-_________________________________________________________________________________________________________________________________________________________________________________________
-
-       Install and Configuring DHCP Server in Ubuntu Server
-
-1. Update and upgrade the server.
-2. Now install the DHCP server.= sudo apt-get install isc-dhcp-server
-3. Change the network configuration file (00-installer-config.yaml file) with the
-   below values.(/etc/netplan/00-installer-config.yaml)
-   addresses: [10.10.10.50/24]
-   routes:
-      - to: default
-        via: 10.10.10.1
-   nameservers:
-   address: [8.8.8.8, 8.8.4.4]
-
-4. Apply the changes.= sudo netplan apply
-5. Configure the dhcpd.conf file.(/etc/dhcp/dhcpd.conf)
-     i.  Before configure the file take a backup of the file.
-    ii. After taking the backup open the dhcpd.conf file with any text editor
-
-6. Do the changes in the configuration file with the below values.
-   subnet 10.10.10.0 netmask 255.255.255.0 {
-      range 10.10.10.100 10.10.10.200;
-      option subnet-mask 255.255.255.0;
-      option domain-name-servers 8.8.8.8, 8.8.4.4;
-   }
-
-7. Save the file and exit.
-8. Restart the DHCP server.= sudo systemctl restart isc-dhcp-server
-9. Check the status of the DHCP server. (Check the status is in active or not, if not troubleshoot
-   the problem)
-10. In client side,
-       i.   Open the Ubuntu Desktop as a client in your virtual environment. (If Ubuntu
-            desktop not available then install)
-
-11. Now check your IP address of your client OS. (Ubuntu desktop)
-12. In your DHCP server side, check the leased addresses.
-
-To assign fixed IP address with a mac address
-1. Configure the dhcpd.conf file with the below values,
-      a. Client host name
-      b. Client host mac address
-2. Restart the DHCP service again and check the status as well.
-3. Now check the IP address of the client machine.
-4. In your DHCP server side, check the leased address is same as your assigned static IP
-   address.
-
-
-__________________________________________________________________________________________________________________________________________________________________________________________
-
-          Install Apache, MySQL & PHP on Ubuntu Server
-
-1. Install Apache webserver.
-
-   1.1. Update Ubuntu Server= sudo apt-get update
-   1.2. Upgrade Ubuntu Server
-   1.3. Install Apache web server= sudo apt-get install apache2
-   1.4. Check Apache webserver running or not.= sudo systemctl status apache2
-   1.5. To test apache web server, open your web browser and access the apache test page by
-        navigating to http://localhost/
-       If you can see Apache2 Ubuntu Default Page, Apache server is working
-
-2. Install MySQL
-
-   2.1. To install MySQL on Ubuntu run= sudo apt-get install mysql_server
-   2.2. Verify if MySQL service is running or not by= sudo systemctl status mysql
-   2.3. To view passwords of MySQL
-   2.4. To add the password to mysql root.= sudo mysql -u root -p -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'new_password';"
-   2.5. Check the password is set properly to the MySQL
-       First leave from logged in MySQL
-       Again log-in to the MySQL= sudo mysql -uroot -p[new_password]
-
-
-3. Install PHP
-
-   3.1. Install PHP= sudo apt-get install php
-   3.2. After installing PHP, create info.php in the apache root document folder
-       In the created file add the following line= save the file in /var/www/html 
-   3.3. In the created file add the following line
-        <?php
-              phpinfo();
-        ?>
-   3.4. And save and quite the file.
-   3.5. Restart the apache service to take effect the changes= sudo systemctl restart apache2
-   3.6. Test PHP
-       Open up your web browser and navigate to localhost:8080 /info.php in address bar
-           ✓ Check the version of PHP
-               $ php -version
-  Now we are going to create an HTML form to take your username and
-           password to store in a mysql database using PHP
-
-1. Create an html form in the location of /var/www/html
-   <!DOCTYPE html>
-   <html>
-   <head>
-       <title>Form site</title>
-   </head>
-   <body>
-       <form method="post" action="myform.php">
-           Username: <input type="text" name="uname"><br><br>
-           Password: <input type="password" name="upassword"><br><br>
-           <input type="submit" value="Submit">
-       </form>
-   </body>
-   </html>
-
-2. Save and exit the file
-3. Next create a database and table in mysql
-   3.1. Login to mysql
-   3.2. Enter the password for user root (This will be your class password: 'Testwebpw1$')
-   3.3. Create a database with the name myDB.
-   3.4. View the list of databases
-   3.5. Create a table ‘user in database ‘myDB’
-   3.6. Check the structure of the above created table
-   3.7. Finally create the php file which connect both html and mysql database.
-         <?php
-             $host = "localhost";
-             $dbusername = "root";
-             $dbpassword = "Testwebpw1$";
-             $dbname = "myDB";
-
-               //Create Connection
-               $conn = new mysqli($host,$dbusername,$dbpassword,$dbname);
-
-               $username = $_POST['uname'];
-               $password = $_POST['upassword'];
-
-               //Insert value in database table
-               $sql = "INSERT INTO user (name,password) values
-               ('$username', '$password')";
-
-               if($conn->query($sql)){
-                    echo "New record is inserted successfully";
-               }
-               else {
-                    echo "Error: ". $sql . "<br>". $conn->error;
-               }
-               $conn->close();
-         ?>
-
-4. Save the file and exit
-5. Now open the HTML form and test it using your browser.
-
+	public void encrypt(String plaintext,int key){
+		String ciphertext ="";
+		plaintext = plaintext.toUpperCase();
+	
+	
+		for (int i=0;i<plaintext.length();i++){
+			for (int j=0;j<alp.length;j++){
+				if (plaintext.charAt(i)==alp[j]){
+					ciphertext = ciphertext+(alp[(j+key)%26]);
+				}
+			}	
+		}
+	
+		System.out.println("Ciphertext: "+ciphertext);
+	
+	
+	}
+	
+	public void decrypt(String ciphertext,int key){
+		String plaintext ="";
+		ciphertext = ciphertext.toUpperCase();
+	
+		int index=0;
+		for (int i=0;i<ciphertext.length();i++){
+			for (int j=0;j<alp.length;j++){
+				if (ciphertext.charAt(i)==alp[j]){
+					index = j-key;
+					if(index<0){
+						index = index+26;
+					}
+					plaintext = plaintext+alp[index];
+				}
+			}	
+		}
+	
+		System.out.println("Plaintext: "+plaintext);
+	}
+	
+	public static void main (String [] args){
+		Scanner scn = new Scanner (System.in);
+		CeaserCipher obj = new CeaserCipher();
+		String msg ="";
+		int key=0;
+		
+		System.out.println("Please choose an option: ");
+		System.out.println("1. Encryption");
+		System.out.println("2. Decryption ");
+		
+		int opt = scn.nextInt();
+		if (opt ==1){
+			System.out.println("Please enter plaintext: ");
+			msg = scn.next();
+			System.out.println("Please enter the key: ");
+			key = scn.nextInt();
+			obj.encrypt(msg,key);
+		}else if (opt == 2){
+			System.out.println("Please enter ciphertext: ");
+			msg = scn.next();
+			System.out.println("Please enter the key: ");
+			key = scn.nextInt();
+			obj.decrypt(msg,key);
+		}else{
+			System.out.println("Inavlid Option");
+		}
+	}
+}
+
+==========================================================================================================
+//monoalphabetic
+import java.util.*;
+
+public class MonoAlphabeticCipher{
+	
+	char alp[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+	char key[] = {'B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A'};
+	
+	public void encrypt(String plaintext){
+		String ciphertext ="";
+		plaintext = plaintext.toUpperCase();
+	
+	
+		for (int i=0;i<plaintext.length();i++){
+			for (int j=0;j<alp.length;j++){
+				if (plaintext.charAt(i)==alp[j]){
+					ciphertext = ciphertext+(key[j]);
+				}
+			}	
+		}
+	
+		System.out.println("Ciphertext: "+ciphertext);
+	
+	
+	}
+	
+	public void decrypt(String ciphertext){
+		String plaintext ="";
+		ciphertext = ciphertext.toUpperCase();
+	
+		
+		for (int i=0;i<ciphertext.length();i++){
+			for (int j=0;j<key.length;j++){
+				if (ciphertext.charAt(i)==key[j]){
+					
+					plaintext = plaintext+alp[j];
+				}
+			}	
+		}
+	
+		System.out.println("Plaintext: "+plaintext);
+	}
+	
+	public static void main (String [] args){
+		Scanner scn = new Scanner (System.in);
+		MonoAlphabeticCipher obj = new MonoAlphabeticCipher();
+		String msg ="";
+		int key=0;
+		
+		System.out.println("Please choose an option: ");
+		System.out.println("1. Encryption");
+		System.out.println("2. Decryption ");
+		
+		int opt = scn.nextInt();
+		if (opt ==1){
+			System.out.println("Please enter plaintext: ");
+			msg = scn.next();
+			obj.encrypt(msg);
+		}else if (opt == 2){
+			System.out.println("Please enter ciphertext: ");
+			msg = scn.next();
+			obj.decrypt(msg);
+		}else{
+			System.out.println("Inavlid Option");
+		}
+	}
+}
+
+====================================================================================================
+//polyalphabetic
+import java.util.*;
+
+public class PolyalphabeticCipher{
+	char alpArr[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+
+	public String prepareKey(String key,String msg){
+		key = key.toUpperCase();
+		msg = msg.toUpperCase();
+		
+		
+			int index =0;
+			for(int i=0;i<msg.length();i++){
+				
+				if(key.length()== msg.length()){
+					break;
+				}else{
+					if (index==key.length()){
+						index=0;
+					}
+				
+					key = key+key.charAt(index);
+					index++;
+				}
+			}
+			return key;
+		
+	}
+	
+	public void encrypt(String plaintext,String key){
+		int p=0;
+		int k=0;
+		int index =0;
+		String ciphertext="";
+		plaintext = plaintext.toUpperCase();
+		
+		for(int i=0;i<plaintext.length();i++){
+			for(int j=0;j<alpArr.length;j++){
+
+				if(key.charAt(i)==alpArr[j]){
+					k=j;
+				}
+				
+				if(plaintext.charAt(i)==alpArr[j]){
+					p=j;
+				}
+				
+			}
+
+			index = (p+k)%26;
+			ciphertext = ciphertext+alpArr[index];
+		}
+		
+		System.out.println("Ciphertext: "+ciphertext);
+	}
+	
+	public void decrypt(String ciphertext,String key){
+		int c=0;
+		int k=0;
+		int index =0;
+		String plaintext="";
+		ciphertext = ciphertext.toUpperCase();
+		
+		for(int i=0;i<ciphertext.length();i++){
+			for(int j=0;j<alpArr.length;j++){
+
+				if(key.charAt(i)==alpArr[j]){
+					k=j;
+				}
+				
+				if(ciphertext.charAt(i)==alpArr[j]){
+					c=j;
+				}
+				
+			}
+
+			index = c-k;
+			if(index<0){
+				index = index+26;
+			}
+			plaintext = plaintext+alpArr[index];
+		}
+		
+		System.out.println("Plaintext: "+plaintext);
+	}
+	
+	public static void main (String []args){
+		Scanner scn = new Scanner (System.in);
+		PolyalphabeticCipher obj = new PolyalphabeticCipher();
+		String key="";
+		String msg="";
+		
+		System.out.println("Please choose an option: ");
+		System.out.println("1. Encryption");
+		System.out.println("2. Decryption ");
+		
+		int opt = scn.nextInt();
+		if (opt ==1){
+			System.out.println("Please enter plaintext: ");
+			msg = scn.next();
+			System.out.println("Please enter the key: ");
+			key = scn.next();
+			key=obj.prepareKey(key,msg);
+			obj.encrypt(msg,key);
+		}else if (opt == 2){
+			System.out.println("Please enter ciphertext: ");
+			msg = scn.next();
+			System.out.println("Please enter the key: ");
+			key = scn.next();
+			key = obj.prepareKey(key,msg);
+			obj.decrypt(msg,key);
+		}else{
+			System.out.println("Inavlid Option");
+		}
+	}
+}
+
+====================================================================================================
+//columnar
+import java.util.*;
+
+public class ColumnarTransposition {
+	
+	public void encrypt(String plaintext,String key){
+		
+		int index[] = new int[key.length()];
+		String ciphertext = "";
+		
+		plaintext = plaintext.toUpperCase();
+		key = key.toUpperCase();
+		int col=key.length();
+
+		if(plaintext.length()%col !=0){
+			for(int i=0;i<plaintext.length()%col;i++){
+				plaintext = plaintext+"_";
+			}
+		}
+		
+		int row = plaintext.length()/col;
+		char mat[][] = new char[row][col];
+		
+		int count=0;
+		for (int i=0;i<row;i++){
+			for(int j=0;j<col;j++){
+				mat[i][j] = plaintext.charAt(count);
+				count++;
+			}
+		}
+		
+		
+		
+		char temp[] = key.toCharArray();
+		Arrays.sort(temp);
+		
+		
+		for(int i=0;i<temp.length;i++){
+			for(int j=0;j<key.length();j++){
+				if(temp[i]==key.charAt(j)){
+					index[i]=j;
+				}
+			}
+		}
+		
+		
+		for(int i=0;i<col;i++){
+			for(int j=0;j<row;j++){
+				
+				ciphertext = ciphertext + mat[j][index[i]];
+			}
+		}
+		
+		System.out.println("Ciphertext: "+ciphertext);
+		
+	}
+	
+	public void decrypt(String ciphertext,String key){
+		int index[] = new int[key.length()];
+		String plaintext = "";
+		
+		ciphertext = ciphertext.toUpperCase();
+		key = key.toUpperCase();
+		int col=key.length();
+		int row= ciphertext.length()/col;
+		
+		char mat[][] = new char[row][col];
+		
+		char temp[] = key.toCharArray();
+		Arrays.sort(temp);
+		
+		
+		for(int i=0;i<temp.length;i++){
+			for(int j=0;j<key.length();j++){
+				if(temp[i]==key.charAt(j)){
+					index[i]=j;
+				}
+			}
+		}
+		
+		int count=0;
+		for (int i=0;i<col;i++){
+			for(int j=0;j<row;j++){
+				mat[j][index[i]] = ciphertext.charAt(count);
+				count++;
+			}
+		}
+		
+		for (int i=0;i<row;i++){
+			for(int j=0;j<col;j++){
+				plaintext = plaintext+mat[i][j];
+			}
+		}
+		
+		System.out.println("Plaintext: "+plaintext);
+		
+	}
+	
+	public static void main (String []args){
+		Scanner scn = new Scanner(System.in);
+		ColumnarTransposition obj = new ColumnarTransposition();
+		String key="";
+		String msg="";
+		
+		System.out.println("Please choose an option: ");
+		System.out.println("1. Encryption");
+		System.out.println("2. Decryption ");
+		
+		int opt = scn.nextInt();
+		if (opt ==1){
+			System.out.println("Please enter plaintext: ");
+			msg = scn.next();
+			System.out.println("Please enter the key: ");
+			key = scn.next();
+			
+			obj.encrypt(msg,key);
+		}else if (opt == 2){
+			System.out.println("Please enter ciphertext: ");
+			msg = scn.next();
+			System.out.println("Please enter the key: ");
+			key = scn.next();
+			
+			obj.decrypt(msg,key);
+		}else{
+			System.out.println("Inavlid Option");
+		}
+	}
+
+}
+
+======================================================================================================
+//otp
+import java.util.*;
+
+public class OTP{
+	char alp[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+	
+	public void encrypt(String plaintext,String key){
+		
+		if(plaintext.length()!=key.length()){
+			System.out.println("The key must be as same length as plaintext");
+		}else{
+			plaintext= plaintext.toUpperCase();
+			key = key.toUpperCase();
+			
+			int p=0;
+			int k=0;
+			int c=0;
+			String ciphertext="";
+			
+			for(int i=0;i<plaintext.length();i++){
+				for(int j=0;j<alp.length;j++){
+					if(plaintext.charAt(i)==alp[j]){
+						p=j;
+					}
+					if(key.charAt(i)==alp[j]){
+						k=j;
+					}
+				}
+				
+				c = (p+k)%26;
+				ciphertext = ciphertext+alp[c];
+			}
+			
+			System.out.println("Ciphertext: "+ciphertext);
+		}
+	}
+	
+	public void decrypt(String ciphertext,String key){
+		
+		if(ciphertext.length()!=key.length()){
+			System.out.println("The key must be as same length as ciphertext");
+		}else{
+			ciphertext= ciphertext.toUpperCase();
+			key = key.toUpperCase();
+			
+			int p=0;
+			int k=0;
+			int c=0;
+			String plaintext="";
+			
+			for(int i=0;i<ciphertext.length();i++){
+				for(int j=0;j<alp.length;j++){
+					if(ciphertext.charAt(i)==alp[j]){
+						c=j;
+					}
+					if(key.charAt(i)==alp[j]){
+						k=j;
+					}
+				}
+				
+				p = (c-k)%26;
+				if(p<0){
+					p=p+26;
+				}
+				plaintext = plaintext+alp[p];
+			}
+			
+			System.out.println("Plaintext: "+plaintext);
+		}
+	}
+	
+	public static void main (String []args){
+		Scanner scn = new Scanner (System.in);
+		OTP obj = new OTP();
+		String key="";
+		String msg="";
+		
+		System.out.println("Please choose an option: ");
+		System.out.println("1. Encryption");
+		System.out.println("2. Decryption ");
+		
+		int opt = scn.nextInt();
+		if (opt ==1){
+			System.out.println("Please enter plaintext: ");
+			msg = scn.next();
+			System.out.println("Please enter the key: ");
+			key = scn.next();
+			obj.encrypt(msg,key);
+		}else if (opt == 2){
+			System.out.println("Please enter ciphertext: ");
+			msg = scn.next();
+			System.out.println("Please enter the key: ");
+			key = scn.next();
+			obj.decrypt(msg,key);
+		}else{
+			System.out.println("Inavlid Option");
+		}
+	}
+}
+
+=====================================================================================================
+//railfence
+
+import java.util.*;
+
+public class RailFenceCipher {
+	
+	public void encrypt(String plaintext,int key){
+		
+		char mat[][]= new char[key][plaintext.length()];
+		String ciphertext="";
+		plaintext = plaintext.toUpperCase();
+		
+		for(int i=0;i<plaintext.length();i++){
+			for(int j=0;j<key;j++){
+				mat[j][i]= '_';
+			}
+		}
+		
+		int index=0;
+		boolean direction = true;
+		for (int i=0;i<plaintext.length();i++){
+			
+			if(index==0){
+				direction=true;
+			}else if(index == key-1){
+				direction=false;
+			}
+			mat[index][i]= plaintext.charAt(i);
+			
+			if(direction){
+				index++;
+			}else{
+				index--;
+			}
+		}
+		
+		for(int i=0;i<key;i++){
+			for(int j=0;j<plaintext.length();j++){
+				System.out.print(mat[i][j]+",");
+			}
+			System.out.println("");
+		}
+		
+		System.out.println("");
+		
+		for(int i=0;i<key;i++){
+			for(int j=0;j<plaintext.length();j++){
+				if(mat[i][j]!= '_'){
+					ciphertext = ciphertext+mat[i][j];
+				}
+			}
+		}
+		
+		System.out.println("Ciphertext: "+ ciphertext);
+	}
+	
+	public void decrypt(String ciphertext,int key){
+		
+		char mat[][]= new char[key][ciphertext.length()];
+		String plaintext="";
+		ciphertext = ciphertext.toUpperCase();
+		
+		for(int i=0;i<ciphertext.length();i++){
+			for(int j=0;j<key;j++){
+				mat[j][i]= '_';
+			}
+		}
+		
+		int index=0;
+		boolean direction = true;
+		for (int i=0;i<ciphertext.length();i++){
+			
+			if(index==0){
+				direction=true;
+			}else if(index == key-1){
+				direction=false;
+			}
+			mat[index][i]= '*';
+			
+			if(direction){
+				index++;
+			}else{
+				index--;
+			}
+		}
+		
+		int count=0;
+		for(int i=0;i<key;i++){
+			for(int j=0;j<ciphertext.length();j++){
+				if(mat[i][j]=='*'){
+					mat[i][j]=ciphertext.charAt(count);
+					count++;
+				}
+				
+			}
+		}
+		
+		for(int i=0;i<key;i++){
+			for(int j=0;j<ciphertext.length();j++){
+				System.out.print(mat[i][j]+",");
+			}
+			System.out.println("");
+		}
+		
+		System.out.println("");
+		
+		for(int i=0;i<ciphertext.length();i++){
+			for(int j=0;j<key;j++){
+				if(mat[j][i]!= '_'){
+					plaintext = plaintext+mat[j][i];
+				}
+			}
+		}
+		
+		System.out.println("Plaintext: "+ plaintext);
+	}
+	
+	public static void main (String []args){
+		RailFenceCipher obj = new RailFenceCipher();
+		Scanner scn = new Scanner (System.in);
+		String msg ="";
+		int key=0;
+		
+		System.out.println("Please choose an option: ");
+		System.out.println("1. Encryption");
+		System.out.println("2. Decryption ");
+		
+		int opt = scn.nextInt();
+		if (opt ==1){
+			System.out.println("Please enter plaintext: ");
+			msg = scn.next();
+			System.out.println("Please enter the key: ");
+			key = scn.nextInt();
+			obj.encrypt(msg,key);
+		}else if (opt == 2){
+			System.out.println("Please enter ciphertext: ");
+			msg = scn.next();
+			System.out.println("Please enter the key: ");
+			key = scn.nextInt();
+			obj.decrypt(msg,key);
+		}else{
+			System.out.println("Inavlid Option");
+		}
+	}
+}
+
+====================================================================================================
+//RSA
+
+import java.math.*;
+import java.util.*;
+
+public class RSA{
+	
+	static double gcdCal(double x,double y){
+		
+		double a=0;
+		double b=0;
+		double r=0;
+		
+		if(x>y){
+			a=x;
+			b=y;
+		}else{
+			a=y;
+			b=x;
+		}
+		
+		while(b!=0){
+			r=a%b;
+			a=b;
+			b=r;
+		}
+		
+		
+		
+		return a;
+	}
+	
+	static double[] keyGen(double p,double q){
+		double n = p*q;
+		double pn = (p-1)*(q-1);
+		double e =2;
+		double d=0;
+		
+		while(e<pn){
+			if(gcdCal(e,pn)==1){
+				break;
+			}
+			
+			e++;
+		}
+		
+		for(int i=0;i<=100;i++)
+		{
+			double x=1+(i*pn);
+			if(x%e==0)      
+			{
+				d=x/e;
+				break;
+			}
+		}
+		System.out.println("d: "+d);
+		System.out.println("n: "+n);
+		
+		double result[]={n,e,d};
+		
+		return result;
+		
+	}
+	
+	static void encrypt(double publicKey[],double plaintext){
+		
+		double n = publicKey[1];
+		double e = publicKey[0];
+		
+		double y = Math.pow(plaintext,e);
+		double s = y%n;
+		
+		System.out.println("Ciphertext value: "+s);
+	}
+	
+	static void decrypt(double privateKey[],double ciphertext){
+		
+		double n = privateKey[1];
+		double d = privateKey[0];
+		
+		double x = Math.pow(ciphertext,d);
+		double ss =  x%n;
+		
+		System.out.println("Plaintext value: "+ss);
+	}
+	
+	public static void main (String []args){
+
+		System.out.println("RSA");
+		double p=11;
+		double q=13;
+		double output[] = keyGen(p,q);
+		
+		System.out.println("n = "+output[0]);
+		System.out.println("e = "+output[1]);
+		System.out.println("d = "+output[2]);
+		
+		double pubKey [] = {output[1],output[0]};
+		double pvtKey [] = {output[2],output[0]};
+		
+		encrypt(pubKey,3);
+		decrypt(pvtKey,42);
+		
+		
+		
+	}
+}
+
+====================================================================================================
